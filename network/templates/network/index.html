@@ -1,0 +1,65 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <div class="container">
+        
+        <h2 class="my-2">All posts</h2>
+        <hr>
+        {% if user.is_authenticated %}
+        <div class="container w-100">
+            <h4>New Post</h4>
+            <form action="{% url 'newPost' %}" method="post">
+                {% csrf_token %}
+                <textarea name="content" id="newpost-content" class="w-100 form-control my-2 shadow-sm" placeholder="Let them know you're alive" rows="5"></textarea>
+                <input class="btn btn-primary" type="submit" value="Post">
+            </form>
+        </div>
+        {% endif %}
+
+
+        <div class="container border rounded my-3">
+            {% if not posts %}
+                <h5 class="text-center my-auto py-3">Nothing here</h5>
+            {% endif %}
+            {% for post in posts %}
+                <div class="card w-75 my-2 mx-auto">
+                    <div class="card-body"> 
+                        <div id="editpost" data-post-id="{{post.id}}">
+                            <h6 class="card-title"><a href="{% url 'profile' post.user %}" class="link-primary link-underline-opacity-0">{{post.user}}</a></h6>
+                            <form action="{% url 'edit' post.id %}">
+                                <textarea name="editpost-content" id="editpost-content" class="w-100 form-control my-2" rows="3"></textarea>
+                                <input class="btn btn-primary btn-sm" type="submit" value="Save">
+                            </form>
+                        </div>
+                        <div id="currentpost">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="card-title"><a href="{% url 'profile' post.user %}" class="link-primary link-underline-opacity-0">{{post.user}}</a></h6>
+                                {% if post.user == user %}
+                                <button class="btn btn-outline-primary btn-sm" id="edit-button">Edit</button>
+                                {% endif %}
+                            </div>
+                            <p class="card-text mt-3 mb-1">{{post.content}}</p>
+                            {% if user.is_authenticated %}
+                                <i id="likeicon_{{post.id}}" data-id="{{post.id}}" style="cursor: pointer;" class="{% if user in post.likes.all %}fa-solid{% else%} fa-regular{%endif%} fa-heart text-primary"></i>
+                                <span id="likecount_{{post.id}}" style="font-size: 1rem;" class="ms-1">{{post.numberOfLikes}}</span>
+                            {% endif %}
+                           
+                        </div>
+                        <p style="font-size: 0.8rem;" class="small-text mt-2">{{post.timestamp}}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <nav class="my-4 d-flex justify-content-center">
+            <ul class="pagination">
+                {% if posts.has_previous %}
+                    <li class="page-item"><a class="page-link shadow" href="?page={{ posts.previous_page_number }}">Previous</a></li>
+                {% endif %}
+
+                {% if posts.has_next %}
+                    <li class="page-item"><a class="page-link shadow" href="?page={{ posts.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+{% endblock %}
